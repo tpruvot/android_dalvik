@@ -54,6 +54,7 @@ char* dexOptGenerateCacheFileName(const char* fileName, const char* subFileName)
     const char* dexRoot;
     const char* cacheRoot;
     const char* systemRoot;
+    const char* sdExtRoot;
     char* cp;
     char dexoptDataOnly[PROPERTY_VALUE_MAX];
 
@@ -103,6 +104,7 @@ char* dexOptGenerateCacheFileName(const char* fileName, const char* subFileName)
     cacheRoot = getenv("ANDROID_CACHE");
     dataRoot = getenv("ANDROID_DATA");
     systemRoot = getenv("ANDROID_ROOT");
+    sdExtRoot = getenv("SD_EXT_DIRECTORY");
 
     /* make sure we didn't get any NULL values */
     if (cacheRoot == NULL)
@@ -117,6 +119,9 @@ char* dexOptGenerateCacheFileName(const char* fileName, const char* subFileName)
     if (dexRoot == NULL)
         dexRoot = "/data";
 
+    if (sdExtRoot == NULL)
+        sdExtRoot = "/sd-ext";
+
     /* Cache anything stored on /system in cacheRoot, everything else in dataRoot */
     if (!strncmp(absoluteFile, systemRoot, strlen(systemRoot))) {
         property_get("dalvik.vm.dexopt-data-only", dexoptDataOnly, "");
@@ -124,6 +129,9 @@ char* dexOptGenerateCacheFileName(const char* fileName, const char* subFileName)
             dexRoot = cacheRoot;
         }
     }
+
+    if (sdExtRoot != NULL && !strncmp(absoluteFile, sdExtRoot, strlen(sdExtRoot)))
+        dexRoot = sdExtRoot;
 
     snprintf(nameBuf, kBufLen, "%s/%s", dexRoot, kDexCachePath);
 
@@ -170,3 +178,4 @@ int dexOptCreateEmptyHeader(int fd)
 
     return 0;
 }
+
