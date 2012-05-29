@@ -658,10 +658,11 @@ void dvmCollectGarbageInternal(const GcSpec* spec)
     dvmEnqueueClearedReferences(&gDvm.gcHeap->clearedReferences);
 
     percentFree = 100 - (size_t)(100.0f * (float)currAllocated / currFootprint);
+#ifndef NDEBUG
     if (!spec->isConcurrent) {
         u4 markSweepTime = dirtyEnd - rootStart;
         bool isSmall = numBytesFreed > 0 && numBytesFreed < 1024;
-        LOGD("%s freed %s%zdK, %d%% free %zdK/%zdK, paused %ums",
+        LOGV("%s freed %s%zdK, %d%% free %zdK/%zdK, paused %ums",
              spec->reason,
              isSmall ? "<" : "",
              numBytesFreed ? MAX(numBytesFreed / 1024, 1) : 0,
@@ -672,7 +673,7 @@ void dvmCollectGarbageInternal(const GcSpec* spec)
         u4 rootTime = rootEnd - rootStart;
         u4 dirtyTime = dirtyEnd - dirtyStart;
         bool isSmall = numBytesFreed > 0 && numBytesFreed < 1024;
-        LOGD("%s freed %s%zdK, %d%% free %zdK/%zdK, paused %ums+%ums",
+        LOGV("%s freed %s%zdK, %d%% free %zdK/%zdK, paused %ums+%ums",
              spec->reason,
              isSmall ? "<" : "",
              numBytesFreed ? MAX(numBytesFreed / 1024, 1) : 0,
@@ -680,6 +681,7 @@ void dvmCollectGarbageInternal(const GcSpec* spec)
              currAllocated / 1024, currFootprint / 1024,
              rootTime, dirtyTime);
     }
+#endif
     if (gcHeap->ddmHpifWhen != 0) {
         LOGD_HEAP("Sending VM heap info to DDM");
         dvmDdmSendHeapInfo(gcHeap->ddmHpifWhen, false);
